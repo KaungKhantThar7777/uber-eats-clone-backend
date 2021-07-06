@@ -1,0 +1,37 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Restaurant {
+  id: Float!
+  name: String!
+  isVegan: Boolean
+  address: String!
+}
+
+type Query {
+  isPizzaGood: Boolean!
+  restaurants: [Restaurant!]!
+}
+
+type Mutation {
+  createRestaurant(input: CreateRestaurantDto!): Boolean!
+  updateRestaurant(input: UpdateRestaurantDto!): Boolean!
+}
+
+input CreateRestaurantDto {
+  name: String!
+  isVegan: Boolean
+  address: String!
+}
+
+input UpdateRestaurantDto {
+  id: Int!
+  data: UpdateRestaurantInput!
+}
+
+input UpdateRestaurantInput {
+  name: String
+  isVegan: Boolean
+  address: String
+}
