@@ -7,11 +7,11 @@ import { join } from 'path';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { UsersModule } from './users/users.module';
+import { JwtModule } from './jwt/jwt.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
       ignoreEnvFile: process.env.NODE_ENV === 'prod',
       validationSchema: Joi.object({
@@ -39,6 +39,9 @@ import { UsersModule } from './users/users.module';
     }),
     CommonModule,
     UsersModule,
+    JwtModule.forRoot({
+      privateKey: process.env.JWT_SECRET,
+    }),
   ],
   controllers: [],
   providers: [],

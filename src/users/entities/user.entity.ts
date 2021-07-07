@@ -1,4 +1,9 @@
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import {
+  Field,
+  InputType,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entities/core.entity';
 import { BeforeInsert, Column, Entity } from 'typeorm';
 import * as argon2 from 'argon2';
@@ -11,6 +16,8 @@ enum UserRole {
 }
 
 registerEnumType(UserRole, { name: 'UserRole' });
+
+@InputType({ isAbstract: true })
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
@@ -24,13 +31,17 @@ export class User extends CoreEntity {
   @Length(5)
   password: string;
 
+  @Field(() => UserRole)
+  @Column({ type: 'enum', enum: UserRole })
+  @IsEnum(UserRole)
+  role: UserRole;
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await argon2.hash(this.password);
   }
 
-  @Field(() => UserRole)
-  @Column({ type: 'enum', enum: UserRole })
-  @IsEnum(UserRole)
-  role: UserRole;
+  checkPassword(password: string) {
+    return argon2.verify(this.password, password);
+  }
 }

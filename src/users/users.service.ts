@@ -1,16 +1,20 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from 'src/jwt/jwt.service';
 import { Repository } from 'typeorm';
 import {
   CreateAccountInput,
   CreateAccountResult,
 } from './dtos/create-account.dto';
+import { LoginInput, LoginResult } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async create({
@@ -34,5 +38,26 @@ export class UserService {
       console.log(error);
       return { ok: false, error: "Couldn't create account" };
     }
+  }
+
+  async login({ email, password }: LoginInput): Promise<LoginResult> {
+    const user = await this.users.findOne({ email });
+    if (!user) {
+      return {
+        ok: false,
+        error: 'Such user does not exist',
+      };
+    }
+
+    const isCorrect = user.checkPassword(password);
+    if (!isCorrect) {
+      return { ok: false, error: 'Incorrect password' };
+    }
+
+    const token = this.jwtService.sign({ id: user.id });
+    return {
+      ok: true,
+      token,
+    };
   }
 }
