@@ -17,6 +17,10 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
 
+  findById(id: number) {
+    return this.users.findOne(id);
+  }
+
   async create({
     email,
     password,
