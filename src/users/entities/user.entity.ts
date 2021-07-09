@@ -5,7 +5,7 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 import * as argon2 from 'argon2';
 import { IsEmail, IsEnum, Length } from 'class-validator';
 
@@ -37,11 +37,14 @@ export class User extends CoreEntity {
   role: UserRole;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword() {
+    console.log(this.password);
     this.password = await argon2.hash(this.password);
   }
 
   checkPassword(password: string) {
+    console.log(password);
     return argon2.verify(this.password, password);
   }
 }

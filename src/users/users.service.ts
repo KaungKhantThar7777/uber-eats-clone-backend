@@ -7,6 +7,7 @@ import {
   CreateAccountInput,
   CreateAccountResult,
 } from './dtos/create-account.dto';
+import { EditProfileInput } from './dtos/edit-profile.dto';
 import { LoginInput, LoginResult } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 
@@ -53,7 +54,7 @@ export class UserService {
       };
     }
 
-    const isCorrect = user.checkPassword(password);
+    const isCorrect = await user.checkPassword(password);
     if (!isCorrect) {
       return { ok: false, error: 'Incorrect password' };
     }
@@ -63,5 +64,15 @@ export class UserService {
       ok: true,
       token,
     };
+  }
+
+  async update(user: User, { email, password }: EditProfileInput) {
+    if (email) {
+      user.email = email;
+    }
+    if (password) {
+      user.password = password;
+    }
+    await this.users.save(user);
   }
 }
