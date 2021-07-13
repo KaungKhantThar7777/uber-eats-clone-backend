@@ -1,16 +1,22 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { join } from 'path';
-import { CommonModule } from './common/common.module';
-import { User } from './users/entities/user.entity';
-import { UsersModule } from './users/users.module';
-import { JwtModule } from './jwt/jwt.module';
-import { NestModule } from '@nestjs/common';
-import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
+import { CommonModule } from './common/common.module';
+import { JwtMiddleware } from './jwt/jwt.middleware';
+import { JwtModule } from './jwt/jwt.module';
+import { User } from './users/entities/user.entity';
+import { Verification } from './users/entities/verification.entity';
+import { UsersModule } from './users/users.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -25,6 +31,9 @@ import { AuthModule } from './auth/auth.module';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
+        MAILGUN_API_KEY: Joi.string().required(),
+        MAILGUN_DOMAIN: Joi.string().required(),
+        MAILGUN_FROM: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -36,7 +45,7 @@ import { AuthModule } from './auth/auth.module';
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
-      entities: [User],
+      entities: [User, Verification],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -50,6 +59,11 @@ import { AuthModule } from './auth/auth.module';
       privateKey: process.env.JWT_SECRET,
     }),
     AuthModule,
+    MailModule.forRoot({
+      apiKey: process.env.MAILGUN_API_KEY,
+      domain: process.env.MAILGUN_DOMAIN,
+      fromEmail: process.env.MAILGUN_FROM,
+    }),
   ],
   controllers: [],
   providers: [],

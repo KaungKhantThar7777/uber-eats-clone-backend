@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
+import { MailService } from 'src/mail/mail.service';
 import { Repository } from 'typeorm';
 import {
   CreateAccountInput,
@@ -10,12 +11,16 @@ import {
 import { EditProfileInput } from './dtos/edit-profile.dto';
 import { LoginInput, LoginResult } from './dtos/login.dto';
 import { User } from './entities/user.entity';
+import { Verification } from './entities/verification.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(Verification)
+    private readonly verifications: Repository<Verification>,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   findById(id: number) {
@@ -38,6 +43,16 @@ export class UserService {
 
       const user = this.users.create({ email, password, role });
       await this.users.save(user);
+      const verification = await this.verifications.save(
+        this.verifications.create({
+          user,
+        }),
+      );
+      await this.mailService.sendVerification(user.email, [
+        { key: 'code', value: verification.code },
+        { key: 'username', value: user.email },
+      ]);
+
       return { ok: true };
     } catch (error) {
       console.log(error);
@@ -55,6 +70,7 @@ export class UserService {
     }
 
     const isCorrect = await user.checkPassword(password);
+    console.log(isCorrect);
     if (!isCorrect) {
       return { ok: false, error: 'Incorrect password' };
     }
@@ -69,10 +85,32 @@ export class UserService {
   async update(user: User, { email, password }: EditProfileInput) {
     if (email) {
       user.email = email;
+      user.verified = false;
+      const verification = await this.verifications.save(
+        this.verifications.create({
+          user,
+        }),
+      );
+      await this.mailService.sendVerification(user.email, [
+        { key: 'code', value: verification.code },
+        { key: 'username', value: user.email },
+      ]);
     }
     if (password) {
       user.password = password;
     }
     await this.users.save(user);
+  }
+
+  async verifyEmail(code: string) {
+    const verification = await this.verifications.findOne(
+      { code },
+      { loadRelationIds: true },
+    );
+    if (!verification) {
+      throw new Error("Your verification code doesn't exist anymore.");
+    }
+    await this.users.update(verification.user, { verified: true });
+    await this.verifications.remove(verification);
   }
 }

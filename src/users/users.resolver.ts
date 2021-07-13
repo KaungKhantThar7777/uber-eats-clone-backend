@@ -10,6 +10,7 @@ import {
 import { EditProfileInput, EditProfileResult } from './dtos/edit-profile.dto';
 import { LoginInput, LoginResult } from './dtos/login.dto';
 import { UserProfileResult } from './dtos/user-profile.dto';
+import { VerifyEmailResult } from './dtos/verify-email.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './users.service';
 
@@ -57,5 +58,18 @@ export class UsersResolver {
   ) {
     await this.userService.update(user, editProfileInput);
     return { ok: true };
+  }
+
+  @Mutation(() => VerifyEmailResult)
+  async verifyEmail(@Args('code') code: string) {
+    try {
+      await this.userService.verifyEmail(code);
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+      };
+    }
   }
 }
