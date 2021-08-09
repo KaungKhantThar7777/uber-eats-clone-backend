@@ -42,7 +42,9 @@ export class UserService {
       }
 
       const user = this.users.create({ email, password, role });
+
       await this.users.save(user);
+
       const verification = await this.verifications.save(
         this.verifications.create({
           user,
@@ -55,7 +57,6 @@ export class UserService {
 
       return { ok: true };
     } catch (error) {
-      console.log(error);
       return { ok: false, error: "Couldn't create account" };
     }
   }
@@ -70,7 +71,7 @@ export class UserService {
     }
 
     const isCorrect = await user.checkPassword(password);
-    console.log(isCorrect);
+
     if (!isCorrect) {
       return { ok: false, error: 'Incorrect password' };
     }
@@ -83,23 +84,30 @@ export class UserService {
   }
 
   async update(user: User, { email, password }: EditProfileInput) {
-    if (email) {
-      user.email = email;
-      user.verified = false;
-      const verification = await this.verifications.save(
-        this.verifications.create({
-          user,
-        }),
-      );
-      await this.mailService.sendVerification(user.email, [
-        { key: 'code', value: verification.code },
-        { key: 'username', value: user.email },
-      ]);
+    try {
+      if (email) {
+        user.email = email;
+        user.verified = false;
+        const verification = await this.verifications.save(
+          this.verifications.create({
+            user,
+          }),
+        );
+        await this.mailService.sendVerification(user.email, [
+          { key: 'code', value: verification.code },
+          { key: 'username', value: user.email },
+        ]);
+      }
+      if (password) {
+        user.password = password;
+      }
+      await this.users.save(user);
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not edit profile. Something went wrong!!',
+      };
     }
-    if (password) {
-      user.password = password;
-    }
-    await this.users.save(user);
   }
 
   async verifyEmail(code: string) {

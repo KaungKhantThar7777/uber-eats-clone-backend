@@ -9,7 +9,7 @@ import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 import * as argon2 from 'argon2';
 import { IsEmail, IsEnum, Length } from 'class-validator';
 
-enum UserRole {
+export enum UserRole {
   Client = 'Client',
   Owner = 'Owner',
   Delivery = 'Delivery',
