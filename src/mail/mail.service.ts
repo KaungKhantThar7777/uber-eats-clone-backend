@@ -42,7 +42,7 @@ export class MailService {
     }
   }
 
-  sendVerification(to: string, emailVars: EmailVariables[]) {
-    this.sendMail('Verification Email Account', to, emailVars);
+  async sendVerification(to: string, emailVars: EmailVariables[]) {
+    await this.sendMail('Verification Email Account', to, emailVars);
   }
 }

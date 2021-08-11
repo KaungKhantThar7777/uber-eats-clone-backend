@@ -84,30 +84,28 @@ export class UserService {
   }
 
   async update(user: User, { email, password }: EditProfileInput) {
-    try {
-      if (email) {
-        user.email = email;
-        user.verified = false;
-        const verification = await this.verifications.save(
-          this.verifications.create({
-            user,
-          }),
-        );
-        await this.mailService.sendVerification(user.email, [
-          { key: 'code', value: verification.code },
-          { key: 'username', value: user.email },
-        ]);
+    if (email) {
+      const isAlreadyExist = await this.users.findOne({ email });
+      if (isAlreadyExist) {
+        throw new Error('Email already taken.');
       }
-      if (password) {
-        user.password = password;
-      }
-      await this.users.save(user);
-    } catch (error) {
-      return {
-        ok: false,
-        error: 'Could not edit profile. Something went wrong!!',
-      };
+      user.email = email;
+      user.verified = false;
+      await this.verifications.delete({ user: { id: user.id } });
+      const verification = await this.verifications.save(
+        this.verifications.create({
+          user,
+        }),
+      );
+      await this.mailService.sendVerification(user.email, [
+        { key: 'code', value: verification.code },
+        { key: 'username', value: user.email },
+      ]);
     }
+    if (password) {
+      user.password = password;
+    }
+    await this.users.save(user);
   }
 
   async verifyEmail(code: string) {

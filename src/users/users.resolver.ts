@@ -22,6 +22,7 @@ export class UsersResolver {
     return user;
   }
 
+  @UseGuards(AuthGuard)
   @Query(() => UserProfileResult)
   async userProfile(@Args('id') id: number): Promise<UserProfileResult> {
     try {
@@ -56,8 +57,13 @@ export class UsersResolver {
     @AuthUser() user: User,
     @Args('input') editProfileInput: EditProfileInput,
   ) {
-    await this.userService.update(user, editProfileInput);
-    return { ok: true };
+    try {
+      await this.userService.update(user, editProfileInput);
+      return { ok: true };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, error: error.message };
+    }
   }
 
   @Mutation(() => VerifyEmailResult)

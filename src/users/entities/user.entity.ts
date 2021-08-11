@@ -43,7 +43,6 @@ export class User extends CoreEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
-    console.log(this.password);
     this.password = await argon2.hash(this.password);
   }
 
