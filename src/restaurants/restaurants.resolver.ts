@@ -6,6 +6,14 @@ import {
   CreateRestaurantInput,
   CreateRestaurantResult,
 } from './dtos/create-restaurant.dto';
+import {
+  DeleteRestaurantInput,
+  DeleteRestaurantResult,
+} from './dtos/delete-restaurant.dto';
+import {
+  EditRestaurantInput,
+  EditRestaurantResult,
+} from './dtos/edit-restaurant.dto';
 import { RestaurantService } from './restaurants.service';
 
 @Resolver()
@@ -24,6 +32,42 @@ export class RestaurantResolver {
     } catch (error) {
       console.log(error);
       return { ok: false, error: error.message };
+    }
+  }
+
+  @Roles(['Owner'])
+  @Mutation(() => EditRestaurantResult)
+  async editRestaurant(
+    @AuthUser() owner: User,
+    @Args('input') input: EditRestaurantInput,
+  ) {
+    try {
+      await this.restaurantService.edit(input, owner);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @Roles(['Owner'])
+  @Mutation(() => DeleteRestaurantResult)
+  async deleteRestaurant(
+    @AuthUser() owner: User,
+    @Args('input') input: DeleteRestaurantInput,
+  ) {
+    try {
+      await this.restaurantService.delete(owner, input);
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error.message,
+      };
     }
   }
 }
