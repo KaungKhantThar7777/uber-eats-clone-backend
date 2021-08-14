@@ -296,7 +296,13 @@ describe('UserModule (e2e)', () => {
         })
         .expect(200)
         .expect((res) => {
-          console.log(res);
+          const {
+            data: {
+              editProfile: { ok, error },
+            },
+          } = res.body;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
         });
     });
   });

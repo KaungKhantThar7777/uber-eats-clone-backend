@@ -4,7 +4,6 @@ import { BeforeInsert, Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { v4 } from 'uuid';
 import { User } from './user.entity';
 
-@InputType({ isAbstract: true })
 @ObjectType()
 @Entity()
 export class Verification extends CoreEntity {

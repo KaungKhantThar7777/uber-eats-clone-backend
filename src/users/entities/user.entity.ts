@@ -5,9 +5,10 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import * as argon2 from 'argon2';
 import { IsEmail, IsEnum, Length } from 'class-validator';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 
 export enum UserRole {
   Client = 'Client',
@@ -17,7 +18,6 @@ export enum UserRole {
 
 registerEnumType(UserRole, { name: 'UserRole' });
 
-@InputType({ isAbstract: true })
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
@@ -39,6 +39,10 @@ export class User extends CoreEntity {
   @Field()
   @Column({ default: false })
   verified: boolean;
+
+  @Field(() => [Restaurant])
+  @OneToMany(() => Restaurant, (restaurant) => restaurant.owner)
+  restaurants: Restaurant[];
 
   @BeforeInsert()
   @BeforeUpdate()
