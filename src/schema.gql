@@ -10,6 +10,7 @@ type Category {
   img: String
   slug: String!
   restaurants: [Restaurant!]!
+  restaurantsCount: Int!
 }
 
 """
@@ -72,6 +73,19 @@ type VerifyEmailResult {
   ok: Boolean!
 }
 
+type AllCategoriesResult {
+  error: String
+  ok: Boolean!
+  categories: [Category!]
+}
+
+type CategoryResult {
+  error: String
+  ok: Boolean!
+  totalPages: Int!
+  category: Category
+}
+
 type CreateRestaurantResult {
   error: String
   ok: Boolean!
@@ -87,9 +101,52 @@ type EditRestaurantResult {
   ok: Boolean!
 }
 
+type AllRestaurantsResult {
+  error: String
+  ok: Boolean!
+  totalPages: Int!
+  restaurants: [Restaurant!]
+}
+
+type OneRestaurantResult {
+  error: String
+  ok: Boolean!
+  restaurant: Restaurant
+}
+
+type SearchRestaurantsResult {
+  error: String
+  ok: Boolean!
+  totalPages: Int!
+  restaurants: [Restaurant!]
+}
+
 type Query {
   me: User
   userProfile(id: Float!): UserProfileResult!
+  allCategories: AllCategoriesResult!
+  oneCategory(input: CategoryInput!): CategoryResult!
+  allRestaurants(input: AllRestaurantsInput!): AllRestaurantsResult!
+  oneRestaurant(input: OneRestaurantInput!): OneRestaurantResult!
+  searchRestaurants(input: SearchRestaurantsInput!): SearchRestaurantsResult!
+}
+
+input CategoryInput {
+  page: Int = 1
+  slug: String!
+}
+
+input AllRestaurantsInput {
+  page: Int = 1
+}
+
+input OneRestaurantInput {
+  restaurantId: Int!
+}
+
+input SearchRestaurantsInput {
+  page: Int = 1
+  query: String!
 }
 
 type Mutation {
