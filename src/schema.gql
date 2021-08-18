@@ -18,6 +18,28 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Choice {
+  name: String!
+  extra: Float
+}
+
+type DishOptions {
+  name: String!
+  choices: [Choice!]
+  extra: Float
+}
+
+type Dish {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  description: String!
+  price: Float!
+  photo: String
+  options: [DishOptions!]
+}
+
 type Restaurant {
   id: Int!
   createdAt: DateTime!
@@ -26,7 +48,7 @@ type Restaurant {
   address: String!
   coverImg: String!
   category: Category
-  owner: User!
+  menu: [Dish!]!
 }
 
 type User {
@@ -121,6 +143,21 @@ type SearchRestaurantsResult {
   restaurants: [Restaurant!]
 }
 
+type CreateDishResult {
+  error: String
+  ok: Boolean!
+}
+
+type EditDishResult {
+  error: String
+  ok: Boolean!
+}
+
+type DeleteDishResult {
+  error: String
+  ok: Boolean!
+}
+
 type Query {
   me: User
   userProfile(id: Float!): UserProfileResult!
@@ -157,6 +194,9 @@ type Mutation {
   createRestaurant(input: CreateRestaurantInput!): CreateRestaurantResult!
   editRestaurant(input: EditRestaurantInput!): EditRestaurantResult!
   deleteRestaurant(input: DeleteRestaurantInput!): DeleteRestaurantResult!
+  createDish(input: CreateDishInput!): CreateDishResult!
+  editDish(input: EditDishInput!): EditDishResult!
+  deleteDish(input: DeleteDishInput!): DeleteDishResult!
 }
 
 input CreateAccountInput {
@@ -192,4 +232,35 @@ input EditRestaurantInput {
 
 input DeleteRestaurantInput {
   id: Int!
+}
+
+input CreateDishInput {
+  name: String!
+  description: String!
+  price: Float!
+  options: [DishOptionsInput!]
+  restaurantId: Int!
+}
+
+input DishOptionsInput {
+  name: String!
+  choices: [ChoiceInput!]
+  extra: Float
+}
+
+input ChoiceInput {
+  name: String!
+  extra: Float
+}
+
+input EditDishInput {
+  name: String
+  description: String
+  price: Float
+  options: [DishOptionsInput!]
+  dishId: Int!
+}
+
+input DeleteDishInput {
+  dishId: Int!
 }

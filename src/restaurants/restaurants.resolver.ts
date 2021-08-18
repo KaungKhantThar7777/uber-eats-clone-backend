@@ -38,6 +38,11 @@ import {
   SearchRestaurantsResult,
   SearchRestaurantsInput,
 } from './dtos/search-restaurants.dto';
+import { Repository } from 'typeorm';
+import { Dish } from './entities/dish.entity';
+import { CreateDishInput, CreateDishResult } from './dtos/create-dish.dto';
+import { EditDishInput, EditDishResult } from './dtos/edit-dish.dto';
+import { DeleteDishInput, DeleteDishResult } from './dtos/delete-dish.dto';
 
 @Resolver()
 export class RestaurantResolver {
@@ -50,7 +55,10 @@ export class RestaurantResolver {
     @Args('input') createRestaurantInput: CreateRestaurantInput,
   ): Promise<CreateRestaurantResult> {
     try {
-      await this.restaurantService.create(createRestaurantInput, owner);
+      await this.restaurantService.createRestaurant(
+        createRestaurantInput,
+        owner,
+      );
       return { ok: true };
     } catch (error) {
       console.log(error);
@@ -65,7 +73,7 @@ export class RestaurantResolver {
     @Args('input') input: EditRestaurantInput,
   ) {
     try {
-      await this.restaurantService.edit(input, owner);
+      await this.restaurantService.editRestaurant(input, owner);
       return {
         ok: true,
       };
@@ -84,7 +92,7 @@ export class RestaurantResolver {
     @Args('input') input: DeleteRestaurantInput,
   ) {
     try {
-      await this.restaurantService.delete(owner, input);
+      await this.restaurantService.deleteRestaurant(owner, input);
       return { ok: true };
     } catch (error) {
       return {
@@ -172,6 +180,47 @@ export class CategoryResolver {
         restaurants,
         totalPages: Math.ceil(totalResult / 25),
       };
+    } catch (error) {
+      return { ok: false, error: error.message };
+    }
+  }
+}
+
+@Resolver(() => Dish)
+export class DishResolver {
+  constructor(private readonly restaurantService: RestaurantService) {}
+  @Mutation(() => CreateDishResult)
+  @Roles(['Owner'])
+  async createDish(
+    @AuthUser() owner: User,
+    @Args('input') input: CreateDishInput,
+  ) {
+    try {
+      await this.restaurantService.createDish(owner, input);
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: error.message };
+    }
+  }
+
+  @Mutation(() => EditDishResult)
+  @Roles(['Owner'])
+  async editDish(@AuthUser() owner: User, @Args('input') input: EditDishInput) {
+    try {
+      await this.restaurantService.editDish(owner, input);
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: error.message };
+    }
+  }
+
+  @Mutation(() => DeleteDishResult)
+  async deleteDish(
+    @AuthUser() owner: User,
+    @Args('input') input: DeleteDishInput,
+  ) {
+    try {
+      return { ok: true };
     } catch (error) {
       return { ok: false, error: error.message };
     }
