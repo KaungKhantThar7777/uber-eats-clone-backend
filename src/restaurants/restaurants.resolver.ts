@@ -11,38 +11,37 @@ import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Roles } from 'src/auth/roles.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { AllCategoriesResult } from './dtos/all-categories.dto';
-import { CategoryInput, CategoryResult } from './dtos/one-category.dto';
-import {
-  CreateRestaurantInput,
-  CreateRestaurantResult,
-} from './dtos/create-restaurant.dto';
-import {
-  DeleteRestaurantInput,
-  DeleteRestaurantResult,
-} from './dtos/delete-restaurant.dto';
-import {
-  EditRestaurantInput,
-  EditRestaurantResult,
-} from './dtos/edit-restaurant.dto';
-import { Category } from './entities/category.entity';
-import { RestaurantService } from './restaurants.service';
 import {
   AllRestaurantsInput,
   AllRestaurantsResult,
 } from './dtos/all-restaurants.dto';
+import { CreateDishInput, CreateDishResult } from './dtos/create-dish.dto';
+import {
+  CreateRestaurantInput,
+  CreateRestaurantResult,
+} from './dtos/create-restaurant.dto';
+import { DeleteDishInput, DeleteDishResult } from './dtos/delete-dish.dto';
+import {
+  DeleteRestaurantInput,
+  DeleteRestaurantResult,
+} from './dtos/delete-restaurant.dto';
+import { EditDishInput, EditDishResult } from './dtos/edit-dish.dto';
+import {
+  EditRestaurantInput,
+  EditRestaurantResult,
+} from './dtos/edit-restaurant.dto';
+import { CategoryInput, CategoryResult } from './dtos/one-category.dto';
 import {
   OneRestaurantInput,
   OneRestaurantResult,
 } from './dtos/one-restaurant.dto';
 import {
-  SearchRestaurantsResult,
   SearchRestaurantsInput,
+  SearchRestaurantsResult,
 } from './dtos/search-restaurants.dto';
-import { Repository } from 'typeorm';
+import { Category } from './entities/category.entity';
 import { Dish } from './entities/dish.entity';
-import { CreateDishInput, CreateDishResult } from './dtos/create-dish.dto';
-import { EditDishInput, EditDishResult } from './dtos/edit-dish.dto';
-import { DeleteDishInput, DeleteDishResult } from './dtos/delete-dish.dto';
+import { RestaurantService } from './restaurants.service';
 
 @Resolver()
 export class RestaurantResolver {

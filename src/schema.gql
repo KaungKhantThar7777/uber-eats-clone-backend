@@ -2,22 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Category {
-  id: Int!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  name: String!
-  img: String
-  slug: String!
-  restaurants: [Restaurant!]!
-  restaurantsCount: Int!
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
 type Choice {
   name: String!
   extra: Float
@@ -40,6 +24,53 @@ type Dish {
   options: [DishOptions!]
 }
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type OrderItemOption {
+  name: String!
+  choice: String
+}
+
+type OrderItem {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  choices: [OrderItemOption!]
+}
+
+type Order {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  customer: User!
+  deliver: User!
+  restaurant: Restaurant!
+  items: [OrderItem!]!
+  total: Float
+  status: OrderStatus!
+}
+
+enum OrderStatus {
+  Pending
+  Cooking
+  PickedUp
+  Delivered
+}
+
+type Category {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  img: String
+  slug: String!
+  restaurants: [Restaurant!]!
+  restaurantsCount: Int!
+}
+
 type Restaurant {
   id: Int!
   createdAt: DateTime!
@@ -48,7 +79,9 @@ type Restaurant {
   address: String!
   coverImg: String!
   category: Category
+  owner: User!
   menu: [Dish!]!
+  orders: [Order!]!
 }
 
 type User {
@@ -101,14 +134,24 @@ type AllCategoriesResult {
   categories: [Category!]
 }
 
-type CategoryResult {
+type AllRestaurantsResult {
   error: String
   ok: Boolean!
   totalPages: Int!
-  category: Category
+  restaurants: [Restaurant!]
+}
+
+type CreateDishResult {
+  error: String
+  ok: Boolean!
 }
 
 type CreateRestaurantResult {
+  error: String
+  ok: Boolean!
+}
+
+type DeleteDishResult {
   error: String
   ok: Boolean!
 }
@@ -118,16 +161,21 @@ type DeleteRestaurantResult {
   ok: Boolean!
 }
 
+type EditDishResult {
+  error: String
+  ok: Boolean!
+}
+
 type EditRestaurantResult {
   error: String
   ok: Boolean!
 }
 
-type AllRestaurantsResult {
+type CategoryResult {
   error: String
   ok: Boolean!
   totalPages: Int!
-  restaurants: [Restaurant!]
+  category: Category
 }
 
 type OneRestaurantResult {
@@ -143,17 +191,7 @@ type SearchRestaurantsResult {
   restaurants: [Restaurant!]
 }
 
-type CreateDishResult {
-  error: String
-  ok: Boolean!
-}
-
-type EditDishResult {
-  error: String
-  ok: Boolean!
-}
-
-type DeleteDishResult {
+type CreateOrderResult {
   error: String
   ok: Boolean!
 }
@@ -197,6 +235,7 @@ type Mutation {
   createDish(input: CreateDishInput!): CreateDishResult!
   editDish(input: EditDishInput!): EditDishResult!
   deleteDish(input: DeleteDishInput!): DeleteDishResult!
+  createOrder(input: CreateOrderInput!): CreateOrderResult!
 }
 
 input CreateAccountInput {
@@ -263,4 +302,19 @@ input EditDishInput {
 
 input DeleteDishInput {
   dishId: Int!
+}
+
+input CreateOrderInput {
+  restaurantId: Int!
+  items: [CreateOrderItemInput!]!
+}
+
+input CreateOrderItemInput {
+  dishId: Int!
+  choices: [OrderItemOptionInputType!]
+}
+
+input OrderItemOptionInputType {
+  name: String!
+  choice: String
 }
