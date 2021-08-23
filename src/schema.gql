@@ -46,7 +46,7 @@ type Order {
   createdAt: DateTime!
   updatedAt: DateTime!
   customer: User!
-  deliver: User!
+  driver: User!
   restaurant: Restaurant!
   items: [OrderItem!]!
   total: Float
@@ -214,6 +214,11 @@ type GetOrdersResult {
   orders: [Order!]
 }
 
+type TakeOrderResult {
+  error: String
+  ok: Boolean!
+}
+
 type Query {
   me: User
   userProfile(id: Float!): UserProfileResult!
@@ -265,6 +270,7 @@ type Mutation {
   deleteDish(input: DeleteDishInput!): DeleteDishResult!
   createOrder(input: CreateOrderInput!): CreateOrderResult!
   editOrder(input: EditOrderInput!): EditOrderResult!
+  takeOrder(input: TakeOrderInput!): TakeOrderResult!
 }
 
 input CreateAccountInput {
@@ -350,5 +356,19 @@ input OrderItemOptionInputType {
 
 input EditOrderInput {
   status: OrderStatus!
-  orderId: Float!
+  orderId: Int!
+}
+
+input TakeOrderInput {
+  id: Int!
+}
+
+type Subscription {
+  pendingOrders: Order!
+  cookedOrders: Order!
+  orderUpdates(input: OrderUpdatesInput!): Order!
+}
+
+input OrderUpdatesInput {
+  id: Int!
 }

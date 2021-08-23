@@ -64,8 +64,13 @@ import { OrderItem } from './orders/entities/order-item.entity';
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      context: ({ req }) => {
-        return { user: req.user };
+      installSubscriptionHandlers: true,
+      context: ({ req, connection }) => {
+        if (req) {
+          return { token: req.headers['token'] };
+        } else if (connection) {
+          return { token: connection.context['token'] };
+        }
       },
     }),
     CommonModule,
@@ -85,10 +90,4 @@ import { OrderItem } from './orders/entities/order-item.entity';
   controllers: [],
   providers: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(JwtMiddleware)
-      .forRoutes({ path: '*', method: RequestMethod.POST });
-  }
-}
+export class AppModule {}

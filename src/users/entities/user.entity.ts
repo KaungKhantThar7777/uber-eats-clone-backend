@@ -48,7 +48,7 @@ export class User extends CoreEntity {
   @OneToMany(() => Order, (order) => order.customer)
   orders: Order[];
 
-  @OneToMany(() => Order, (order) => order.deliver)
+  @OneToMany(() => Order, (order) => order.driver)
   rides: Order[];
 
   @BeforeInsert()

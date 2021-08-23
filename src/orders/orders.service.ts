@@ -1,8 +1,16 @@
+import { Inject } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { Mutation } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 import { errorMonitor } from 'events';
+import { PubSub } from 'graphql-subscriptions';
 import { AuthUser } from 'src/auth/auth-user.decorator';
+import {
+  NEW_COOKED_ORDER,
+  NEW_PENDING_ORDER,
+  ORDER_STATUS_UPDATE,
+  PUB_SUB,
+} from 'src/common/common.constants';
 import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
@@ -11,6 +19,7 @@ import { CreateOrderInput, CreateOrderResult } from './dtos/create-order.dto';
 import { EditOrderInput } from './dtos/edit-order.dto';
 import { GetOrderInput } from './dtos/get-order.dto';
 import { GetOrdersInput } from './dtos/get-orders.dto';
+import { TakeOrderInput } from './dtos/take-order.dto';
 import { OrderItem } from './entities/order-item.entity';
 import { Order, OrderStatus } from './entities/order.entity';
 
@@ -24,6 +33,7 @@ export class OrderService {
     private readonly dishes: Repository<Dish>,
     @InjectRepository(OrderItem)
     private readonly orderItems: Repository<OrderItem>,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
   async createOrder(customer: User, { items, restaurantId }: CreateOrderInput) {
@@ -56,7 +66,6 @@ export class OrderService {
         }
       });
       finalTotal += dishTotal;
-      console.log('here final total', finalTotal);
 
       const orderItem = await this.orderItems.save(
         this.orderItems.create({
@@ -75,6 +84,9 @@ export class OrderService {
     });
 
     await this.orders.save(order);
+    this.pubSub.publish(NEW_PENDING_ORDER, {
+      pendingOrders: { order, ownerId: restaurant.ownerId },
+    });
   }
 
   async getOrders(user: User, { status }: GetOrdersInput) {
@@ -140,6 +152,7 @@ export class OrderService {
       throw new Error('Permission denied to access the order');
     }
     let canEdit = true;
+
     if (
       user.role === UserRole.Owner &&
       status !== OrderStatus.Cooking &&
@@ -158,19 +171,47 @@ export class OrderService {
     if (!canEdit) {
       throw new Error('Could not edit the order');
     }
-    await this.orders.save([
-      {
-        id: orderId,
-        status,
-      },
-    ]);
+    await this.orders.save({
+      id: orderId,
+      status,
+    });
+
+    const newOrder = { ...order, status };
+    if (user.role === UserRole.Owner && status === OrderStatus.Cooked) {
+      await this.pubSub.publish(NEW_COOKED_ORDER, {
+        cookedOrders: newOrder,
+      });
+    }
+
+    await this.pubSub.publish(ORDER_STATUS_UPDATE, { orderUpdates: newOrder });
+  }
+
+  async takeOrder(driver: User, { id }: TakeOrderInput) {
+    const order = await this.orders.findOne(id);
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    if (order.driver) {
+      throw new Error('This order already had delivery');
+    }
+
+    const newOrder = await this.orders.save({
+      ...order,
+      driver,
+    });
+
+    await this.pubSub.publish(ORDER_STATUS_UPDATE, {
+      orderUpdates: newOrder,
+    });
   }
   async isAllowed(user: User, order: Order) {
     let allowed = true;
     if (user.role === UserRole.Client && user.id !== order.customerId) {
       allowed = false;
     }
-    if (user.role === UserRole.Delivery && user.id !== order.deliverId) {
+    if (user.role === UserRole.Delivery && user.id !== order.driverId) {
       allowed = false;
     }
     if (user.role === UserRole.Owner && user.id !== order.restaurant.ownerId) {
