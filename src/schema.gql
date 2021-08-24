@@ -85,6 +85,17 @@ type Restaurant {
   orders: [Order!]!
 }
 
+type Payment {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  transactionId: String!
+  user: User!
+  userId: Int!
+  restaurant: Restaurant!
+  restaurantId: Int!
+}
+
 type User {
   id: Int!
   createdAt: DateTime!
@@ -219,6 +230,17 @@ type TakeOrderResult {
   ok: Boolean!
 }
 
+type CreatePaymentResult {
+  error: String
+  ok: Boolean!
+}
+
+type GetPaymentsResult {
+  error: String
+  ok: Boolean!
+  payments: [Payment!]!
+}
+
 type Query {
   me: User
   userProfile(id: Float!): UserProfileResult!
@@ -229,6 +251,7 @@ type Query {
   searchRestaurants(input: SearchRestaurantsInput!): SearchRestaurantsResult!
   getOrders(input: GetOrdersInput!): GetOrdersResult!
   getOrder(input: GetOrderInput!): GetOrderResult!
+  getPayments: GetPaymentsResult!
 }
 
 input CategoryInput {
@@ -271,6 +294,7 @@ type Mutation {
   createOrder(input: CreateOrderInput!): CreateOrderResult!
   editOrder(input: EditOrderInput!): EditOrderResult!
   takeOrder(input: TakeOrderInput!): TakeOrderResult!
+  createPayment(input: CreatePaymentInput!): CreatePaymentResult!
 }
 
 input CreateAccountInput {
@@ -361,6 +385,11 @@ input EditOrderInput {
 
 input TakeOrderInput {
   id: Int!
+}
+
+input CreatePaymentInput {
+  transactionId: String!
+  restaurantId: Int!
 }
 
 type Subscription {

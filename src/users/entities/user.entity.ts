@@ -10,6 +10,7 @@ import * as argon2 from 'argon2';
 import { IsEmail, IsEnum, Length } from 'class-validator';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { Order } from 'src/orders/entities/order.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
 
 export enum UserRole {
   Client = 'Client',
@@ -47,6 +48,9 @@ export class User extends CoreEntity {
 
   @OneToMany(() => Order, (order) => order.customer)
   orders: Order[];
+
+  @OneToMany(() => Payment, (payment) => payment.user)
+  payments: Payment[];
 
   @OneToMany(() => Order, (order) => order.driver)
   rides: Order[];
