@@ -83,6 +83,8 @@ type Restaurant {
   owner: User!
   menu: [Dish!]!
   orders: [Order!]!
+  isPromoted: Boolean!
+  promotedUntil: DateTime!
 }
 
 type Payment {

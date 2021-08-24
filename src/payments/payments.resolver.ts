@@ -39,6 +39,5 @@ export class PaymentResolver {
     } catch (error) {
       return { ok: false, error: error.message };
     }
-    return;
   }
 }
